@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="manifest" href="./manifest.webmanifest">
+
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mi Colección">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi Colección</title>
+  <style>
+  
+    :root{
+      --primary: #4a90e2;
+      --primary-contrast: #ffffff;
+      --muted: #c9cdd6;
+      --card: #ffffff;
+      --fg: #111111;
+      --shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    body.dark-theme{
+      --card: #777;
+      --fg: #ffffff;
+      --muted: #666;
+      --shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+  
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f5;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #4a90e2;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #4a90e2;
+      color: white;
+      padding: 15px;
+      margin: 10px auto;
+      width: 90%;
+      max-width: 300px;
+      height: 50px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .button.save-btn {
+      background-color: #27ae60;
+    }
+
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .item {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px auto;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      max-width: 500px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;  /* Centra los elementos */
+      text-align: center;  /* Centra el texto */
+      position: relative; /* Necesario para que el botón X se posicione correctamente */
+    }
+
+    
+    .cover-preview-modal {
+      width: 150px;  /* Tamaño de la imagen */
+      height: auto;
+      margin-top: 10px;
+      object-fit: cover;
+      display: block;  /* Asegura que la imagen esté centrada */
+      margin-left: auto;  /* Centra la imagen horizontalmente */
+      margin-right: auto; /* Centra la imagen horizontalmente */
+    }
+
+    
+    .close {
+      color: #aaa;
+      font-size: 54px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute; /* Esto permite moverlo fuera del flujo normal */
+      top: 10px; /* Distancia desde la parte superior */
+      right: 10px; /* Distancia desde el borde derecho */
+    }
+
+    
+    .modal-buttons {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #f5a623;
+      color: white;
+    }
+
+    .save-btn {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #d0021b;
+      color: white;
+    }
+
+    .image-preview {
+      margin-top: 10px;
+      max-width: 100%;
+      max-height: 200px;
+      display: none;
+    }
+
+    
+
+   
+   
+    /* Vista tipo portada */
+    .cover-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .cover-grid img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+  .toggle-view-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.2s;
+}
+
+.toggle-view-btn:hover {
+  transform: scale(1.1);
+}
+  
+    body.dark-theme {
+  background-color: #1e1e2f;
+  color: #f0f0f0;
+}
+
+body.dark-theme .button {
+  background-color: #555 !important;
+  color: white !important;
+}
+
+
+body.dark-theme .item,
+body.dark-theme form,
+body.dark-theme .modal-content {
+  background-color: #777 !important;
+  color: white;
+}
+
+
+body.dark-theme input,
+body.dark-theme textarea,
+body.dark-theme select {
+  background-color: #444;
+  color: white;
+  border-color: #666;
+}
+
+/* Botón fijo de paleta */
+.toggle-theme-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: auto;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.2s;
+}
+
+.toggle-theme-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Color del icono en modo claro/oscuro */
+.toggle-theme-btn { color: #4a90e2; }
+body.dark-theme .toggle-theme-btn { color: #f0f0f0; }
+
+/* Icono de cambio de vista en blanco para modo oscuro */
+body.dark-theme .toggle-view-btn {
+  color: #ffffff;
+}
+
+/* Enlaces en negrita, azul claro y siempre subrayados en el modal con tema oscuro */
+body.dark-theme .modal-content a {
+  color: #6FA8DC !important;
+  font-weight: bold !important;
+  text-decoration: underline !important;
+}
+
+body.dark-theme .modal-content a:hover {
+  opacity: 0.9;
+}
+
+.category-header {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 25px; /* ahora 25px de separación */
+  text-align: center;
+}
+
+
+.category-header h2 {
+  margin: 0;
+  display: inline-block; /* para que text-align funcione bien */
+  font-size: 36px;       /* nuevo: texto más grande */
+}
+
+
+#itemList {
+  margin-top: 15px;
+}
+
+
+/* Modal de confirmación centrado */
+#confirmDeleteModal .modal-content {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+}
+
+#confirmDeleteModal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#categoryItemCount {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: bold;
+  margin-top: 16px;     /* aire con ítems */
+  margin-bottom: 6px;   /* menos aire antes de paginación */
+  color: #000;
+}
+
+body.dark-theme #categoryItemCount {
+  color: #fff;
+}
+
+
+
+/* Botón volver */
+.back-btn {
+  text-align: center;
+  margin: 12px 0 20px;  /* equilibrado: poco aire arriba, un poco abajo */
+}
+
+.back-btn .button {
+  padding: 12px 28px;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+
+/* ===== Añadir Ítem: contener y centrar correctamente ===== */
+#addScreen form {
+  max-width: 560px;      /* tarjeta más estrecha y centrada */
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+#addScreen form input,
+#addScreen form select,
+#addScreen form textarea,
+#addScreen form button {
+  width: 100%;
+  box-sizing: border-box; /* incluye paddings/bordes en el ancho */
+}
+
+#addScreen form {
+  display: grid;
+  gap: 12px;
+}
+
+#addScreen form input[type="file"] {
+  padding: 8px;
+}
+
+#addScreen form .save-btn {
+  width: 100%;
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ===== Barra de filtros en categoría ===== */
+.filters-bar {
+  width: 100%;
+  max-width: 500px;
+  margin: 10px auto 0;
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: none;                 /* <- oculta por defecto */
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.filters-bar input,
+.filters-bar select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+.filters-actions {
+  grid-column: 1 / -1; /* botones a lo ancho */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 420px) {
+  .filters-bar { grid-template-columns: 1fr; }
+  .filters-actions { grid-template-columns: 1fr 1fr; }
+}
+
+/* Tema oscuro */
+body.dark-theme .filters-bar {
+  background: #777 !important;
+  color: #fff;
+}
+body.dark-theme .filters-bar input,
+body.dark-theme .filters-bar select {
+  background: #444;
+  color: #fff;
+  border-color: #666;
+}
+
+/* ===== Home: cuadrícula de categorías (2×3) y acciones ===== */
+#categoryButtons {
+  max-width: 560px;
+  margin: 20px auto 0;  
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+#categoryButtons .cat-tile {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;   /* ← Fuerza mayúsculas */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+}
+
+#homeActions {
+  max-width: 560px;
+  margin: 24px auto 0;         /* separación clara con la rejilla */
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#homeActions .action-btn {
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;          /* más pequeños que las categorías */
+  min-width: 130px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Tema oscuro */
+body.dark-theme #categoryButtons .cat-tile,
+body.dark-theme #homeActions .action-btn {
+  background-color: #555 !important;
+  color: #fff !important;
+}
+
+#homeScreen {
+  padding-bottom: 40px;  /* deja aire abajo antes del borde y del icono 🎨/🌙 */
+}
+
+#paginationControls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+#paginationControls select{
+  width:auto;
+  max-width:140px;
+  min-width:100px;
+}
+
+#paginationControls .page-btn{
+  min-width:36px;
+  height:36px;
+  padding:0 10px;
+  font-size:.9rem;
+  border:0;
+  border-radius:6px;
+  cursor:pointer;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  box-shadow: var(--shadow);
+  transition: transform .08s ease, opacity .2s ease, background .2s ease;
+}
+#paginationControls .page-btn:hover:not(:disabled){ transform: translateY(-1px); }
+#paginationControls .page-btn:active:not(:disabled){ transform: translateY(0); }
+#paginationControls .page-btn:disabled{
+  cursor: default;
+  opacity: .55;
+  background: color-mix(in srgb, var(--primary) 30%, var(--muted) 70%);
+}
+
+#paginationControls .page-select{
+  height:36px;
+  min-width:110px;
+  max-width:140px;
+  padding:4px 6px;
+  border-radius:6px;
+  border:1px solid var(--muted);
+  background:var(--card);
+  color:var(--fg);
+  box-shadow:var(--shadow);
+  font-size:.9rem;
+  flex:0 0 auto;
+
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  background-image:none;
+
+  text-align:center;
+  text-align-last:center;
+  -moz-text-align-last:center;
+}
+#paginationControls .page-select::-ms-expand{ display:none; }
+#paginationControls .page-select:focus{
+  outline: 3px solid #8ec6ff;
+  outline-offset: 1px;
+}
+
+/* ===== Variantes de botón (modal / acciones) ===== */
+.button.secondary {
+  background: var(--muted);
+  color: var(--fg);
+  border: 1px solid var(--muted);
+  box-shadow: none;
+}
+
+.button.secondary:hover {
+  opacity: .92;
+}
+
+.button.danger {
+  background: #d64545;
+  color: #fff;
+  border: 1px solid #d64545;
+  box-shadow: var(--shadow);
+}
+
+.button.danger:hover {
+  opacity: .92;
+}
+
+/* ===== Botones dentro de modales: evitar que .button (home) rompa el layout ===== */
+.modal .modal-buttons .button{
+  width: auto;        /* quita el 90% */
+  max-width: none;    /* quita el tope de 300px */
+  margin: 0;          /* quita margin auto */
+  height: auto;       /* quita height fijo */
+  padding: 10px;      /* consistente con modal */
+  flex: 1;            /* respeta el flex de modal-buttons */
+}
+
+/* ===== Toast (feedback no intrusivo) ===== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  max-width: min(92vw, 520px);
+  box-shadow: var(--shadow);
+  
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--muted);
+  
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.success {
+  border-color: color-mix(in srgb, #22c55e 55%, var(--muted) 45%);
+}
+
+.toast.error {
+  border-color: color-mix(in srgb, #ef4444 55%, var(--muted) 45%);
+}
+
+.subcat-inline {
+  opacity: .9;
+}
+
+  </style>
+</head>
+<body>
+  
+    
+    <div id="homeScreen" class="screen active">
+  <div id="categoryButtons"></div>
+</div>
+
+<div id="addScreen" class="screen">
+  <h2>Añadir Ítem</h2>
+  <form id="addItemForm">
+    <input type="text" id="title" placeholder="Título" required />
+    <select id="type" required>
+    <option value="" disabled selected>Selecciona una categoría</option>
+    </select>
+       
+    <select id="subcategory" style="display:none;">
+    <option value="" disabled selected>Selecciona una subcategoría</option>
+    <option value="Funkos">Funkos</option>
+    <option value="Lego">Lego</option>
+    <option value="Otros">Otros</option>
+    </select>
+
+    <input type="text" id="author" placeholder="Autor / Director / Artista" />
+    <input type="text" id="format" placeholder="Formato" />
+    <input type="text" id="genre"  placeholder="Género" />
+    <input type="text" id="year"   placeholder="Año" inputmode="numeric" />
+    <textarea id="notes" placeholder="Notas (opcional)"></textarea>
+    <input type="file" id="coverImage" accept="image/*" />
+    <img id="coverPreview" class="image-preview" alt="Vista previa de la portada" />
+    <!-- Campo "Más info" -->
+    <input type="text" id="moreInfo" placeholder="Más info (URL)" />
+    <button type="submit" class="button save-btn">Guardar</button>
+  </form>
+
+  <div class="back-btn">
+    <button class="button" onclick="showScreen('homeScreen')">Volver</button>
+  </div>
+</div>
+
+<div id="categoryScreen" class="screen">
+  <div class="category-header" style="display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; position: relative;">
+    <h2 id="categoryTitle" style="margin: 0; flex: 1; text-align: center;"></h2>
+    <button onclick="toggleSearch()" class="search-btn" title="Buscar">🔍</button>
+  </div>
+
+
+ <div id="filtersBar" class="filters-bar" style="display:none;">
+  <input type="text" id="filterText" placeholder="Título" />
+  <input type="text" id="filterAuthor" placeholder="Autor / Director / Artista" />
+  <select id="filterFormat">
+    <option value="">Todos los formatos</option>
+  </select>
+  <select id="filterGenre">
+    <option value="">Todos los géneros</option>
+  </select>
+  <select id="filterYear">
+    <option value="">Todos los años</option>
+  </select>
+
+  <!-- 👇 NUEVO: solo se mostrará en la categoría 'Otros' -->
+  <div id="filterSubcatWrap" style="display:none;">
+    <select id="filterSubcategory">
+      <option value="">Todas las subcategorías</option>
+      <option value="Funkos">Funkos</option>
+      <option value="Lego">Lego</option>
+      <option value="Otros">Otros</option>
+    </select>
+  </div>
+  <!-- 👆 FIN NUEVO -->
+
+  <div class="filters-actions">
+    <button type="button" class="button" id="applyFiltersBtn">Aplicar</button>
+    <button type="button" class="button" id="clearFiltersBtn">Limpiar</button>
+  </div>
+</div>
+ 
+<div id="itemList"></div>
+
+<p id="categoryItemCount"></p>
+
+<div id="paginationControls"></div>
+
+
+<div class="back-btn">
+  <button class="button" onclick="showScreen('homeScreen')">Volver</button>
+</div>
+
+<!-- Botón fijo de cambiar vista -->
+<button class="toggle-view-btn" onclick="toggleView()" title="Cambiar vista">👁</button>
+
+</div> <!-- Cierra #categoryScreen -->
+
+
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">×</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+
+
+<div id="confirmDeleteModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeConfirmDeleteModal()">×</span>
+    <p style="margin-bottom: 20px;">¿Estás seguro de que quieres eliminar este ítem?</p>
+    <div class="modal-buttons">
+      <button type="button" class="button danger" onclick="confirmDelete()">Sí, eliminar</button>
+      <button type="button" class="button secondary" onclick="closeConfirmDeleteModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Exportar -->
+<div id="exportModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeExportModal()">×</span>
+    <h3 style="margin-top:0;">Exportar</h3>
+    <p style="margin-top:0; opacity:.85;">Elige qué categoría exportar</p>
+    <div id="exportOptions" class="modal-buttons" style="flex-direction:column; width:100%; gap:10px;"></div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Importación -->
+<div id="importConfirmModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeImportConfirmModal()">×</span>
+    <h3 style="margin-top:0;">Confirmar importación</h3>
+    <p id="importConfirmText" style="margin-top:0; opacity:.9; text-align:left;"></p>
+    <div class="modal-buttons" style="width:100%;">
+      <button type="button" class="button save-btn" id="importConfirmOkBtn">Continuar</button>
+      <button type="button" class="button secondary" onclick="closeImportConfirmModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Botón fijo de cambiar tema -->
+<button id="themeBtn" onclick="toggleTheme()" class="toggle-theme-btn" title="Cambiar tema">
+  🌙
+</button>
+<input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none" />
+
+<script src="./libs/xlsx.full.min.js"></script>
+
+
+<script>
+  const screens = {
+    homeScreen: document.getElementById('homeScreen'),
+    addScreen: document.getElementById('addScreen'),
+    categoryScreen: document.getElementById('categoryScreen')
+  };
+
+  const modal = document.getElementById('modal');
+  const modalBody = document.getElementById('modalBody');
+  const coverImage = document.getElementById('coverImage');
+  const coverPreview = document.getElementById('coverPreview');
+  
+  // ==== DataStore (capa de persistencia) ====
+  const DataStore = {
+    KEY: 'miColeccionItems',
+  
+    load() {
+      try {
+        const raw = localStorage.getItem(this.KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+      console.error('[DataStore.load]', e);
+      return [];
+      }
+    },
+  
+    save(arr) {
+      try {
+        localStorage.setItem(this.KEY, JSON.stringify(arr));
+      } catch (e) {
+        const msg = 'No se han podido guardar (almacenamiento lleno)';
+        if (typeof toast === 'function') toast(msg, 'error', 2600);
+        else alert(msg);
+        console.error('[DataStore.save] almacenamiento lleno o fallo al guardar', e);
+        throw e;
+      }
+    }
+  };
+
+  let items = [];
+  let categories = ['CDs', 'Libros', 'Películas', 'Videojuegos', 'Vinilos', 'Otros'];
+  let currentItemId = null;
+  let currentView = 'cover'; // por defecto 'miniaturas'
+  let currentCategory = null;
+  let currentPage = 1;
+  const itemsPerPage = 6;
+  let currentFilters = { text: '', author: '', format: '', genre: '', year: '', subcategory: '' };
+
+
+  // ⚠️ IDs aleatorios deshabilitados: usamos IDs deterministas para evitar duplicados y preparar sync
+    function generateId(itemLike) {
+      if (!itemLike) {
+        throw new Error('generateId() deshabilitado: usa stableIdFromKey(stableKeyForItem(item))');
+      }
+      return stableIdFromKey(stableKeyForItem(itemLike));
+    }
+
+function escapeHtml(v) {
+  return String(v ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function normalizeText(s){
+  return (s ?? '').toString().normalize('NFKC').trim().toLowerCase();
+}
+
+
+function canonicalizeType(s){
+  const t = normalizeText(s);
+  if (t === 'vinilo' || t === 'vinilos') return 'Vinilos';
+  if (t === 'cd' || t === 'cds') return 'CDs';
+  if (t === 'pelicula' || t === 'películas' || t === 'peliculas') return 'Películas';
+  if (t === 'videojuego' || t === 'videojuegos') return 'Videojuegos';
+  if (t === 'libro' || t === 'libros') return 'Libros';
+  if (t === 'otros') return 'Otros';
+  const known = ['CDs','Libros','Películas','Videojuegos','Vinilos','Otros'];
+  const found = known.find(k => normalizeText(k) === t);
+  return found ?? s;
+}
+
+function stableKeyForItem(it) {
+  return [
+    canonicalizeType(it.type),
+    normalizeText(it.title),
+    normalizeText(it.author),
+    String(it.year ?? '').trim(),
+    normalizeText(it.format),
+    normalizeText(it.subcategory),
+    normalizeText(it.genre)
+  ].join('|');
+}
+
+// Hash rápido y estable (FNV-1a 32-bit) -> id corto
+function stableIdFromKey(key) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  // prefijo para distinguir de ids aleatorios antiguos
+  return 'i_' + (h >>> 0).toString(36);
+}
+
+function safeUrl(v){
+  if (!v) return '';
+  try { return new URL(v).href; } catch { return ''; }
+}
+
+// ===== Toast (feedback no intrusivo) =====
+let toastTimer = null;
+
+function toast(message, type = 'success', ms = 1600) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  
+  el.textContent = String(message || '');
+  el.classList.remove('success', 'error');
+  el.classList.add(type === 'error' ? 'error' : 'success');
+  
+  // Reiniciar animación si se llama varias veces rápido
+  el.classList.remove('show');
+  // Forzar reflow para que la transición vuelva a disparar
+  void el.offsetWidth;
+  el.classList.add('show');
+  
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+  }, ms);
+}
+
+function flashSuccess(message = 'Acción completada') {
+  toast(message, 'success', 1800);
+}
+
+  function renderCategoryButtons() {
+  const container = document.getElementById('categoryButtons');
+  container.innerHTML = '';
+
+  // Rejilla 2 columnas con baldosas cuadradas
+  const sorted = [...categories].sort();
+  sorted.forEach(cat => {
+    const tile = document.createElement('button');
+    tile.className = 'cat-tile';
+    tile.textContent = cat;
+    tile.onclick = () => showCategory(cat);
+    container.appendChild(tile);
+  });
+
+  // Contenedor de acciones pequeñas (Añadir / Importar) bajo la rejilla
+  let actions = document.getElementById('homeActions');
+  if (!actions) {
+    actions = document.createElement('div');
+    actions.id = 'homeActions';
+    // insertarlo justo debajo del grid
+    container.parentNode.insertBefore(actions, container.nextSibling);
+  }
+  actions.innerHTML = '';
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'action-btn';
+  addBtn.textContent = '+ Añadir';
+  addBtn.onclick = () => showScreen('addScreen');
+
+  const importBtn = document.createElement('button');
+  importBtn.className = 'action-btn';
+  importBtn.textContent = '+ Importar';
+  importBtn.onclick = () => {
+    // si tienes un input oculto para Excel, úsalo
+    const hidden = document.getElementById('importExcelInput');
+    if (hidden) {
+      hidden.click();
+    } else {
+      // fallback: crear uno temporal y usar tu handleImportExcel
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.xlsx,.xls';
+      input.style.display = 'none';
+      input.addEventListener('change', handleImportExcel);
+      document.body.appendChild(input);
+      input.click();
+    }
+  };
+
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'action-btn';
+  exportBtn.textContent = '⬇️ Exportar';
+  exportBtn.onclick = () => openExportMenu();
+
+  actions.appendChild(addBtn);
+  actions.appendChild(importBtn);
+  actions.appendChild(exportBtn);
+  }
+  
+ 
+  function saveItemsToLocalStorage() {
+    DataStore.save(items);
+  }
+  
+  
+  function loadItemsFromLocalStorage() {
+    items = DataStore.load();
+  }
+ 
+  function showScreen(id) {
+      // Activar solo la pantalla actual
+      Object.values(screens).forEach(screen => screen.classList.remove('active'));
+      screens[id].classList.add('active');
+  
+      // Ocultar paginación si no estamos en la pantalla de categoría
+      const pagination = document.getElementById('paginationControls');
+      if (pagination && id !== 'categoryScreen') {
+        pagination.innerHTML = '';
+      }
+  
+      // Mostrar/ocultar botón de cambio de vista (👁)
+      const viewBtn = document.querySelector('.toggle-view-btn');
+      if (viewBtn) {
+        viewBtn.style.display = (id === 'categoryScreen') ? 'block' : 'none';
+      }
+    }
+  
+  
+  function showCategory(category){
+  const canon = canonicalizeType(category);
+  showScreen('categoryScreen');
+  document.getElementById('categoryTitle').innerText = canon;
+  currentCategory = canon;
+
+  // 🔹 Reset filtros al entrar (si tienes esta función)
+  if (typeof resetFiltersUIAndState === 'function') {
+    resetFiltersUIAndState();
+  }
+
+  currentPage = 1;
+  renderItems(canon);
+}
+  
+// Muestra/oculta la barra de filtros y engancha los botones
+function toggleSearch(){
+  const bar = document.getElementById('filtersBar');
+  if (!bar) return;
+
+  // Alternar visibilidad
+  const show = bar.style.display === 'none' || bar.style.display === '';
+  bar.style.display = show ? 'grid' : 'none';
+  bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+
+  if (!show) return; // si se oculta, no hay nada más que hacer
+
+  // Rellenar selects según la categoría actual
+  populateFilterOptions(currentCategory);
+
+  // Subcategoría solo visible si la categoría es "Otros"
+  const subWrap = document.getElementById('filterSubcatWrap');
+  if (subWrap) subWrap.style.display = (currentCategory === 'Otros') ? 'block' : 'none';
+
+  // Evitar listeners duplicados: clonar botones
+  const applyOld = document.getElementById('applyFiltersBtn');
+  const clearOld = document.getElementById('clearFiltersBtn');
+  if (!applyOld || !clearOld) return;
+
+  const applyBtn = applyOld.cloneNode(true);
+  const clearBtn = clearOld.cloneNode(true);
+  applyOld.parentNode.replaceChild(applyBtn, applyOld);
+  clearOld.parentNode.replaceChild(clearBtn, clearOld);
+
+  // Aplicar filtros (incluye GÉNERO)
+  applyBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    currentFilters.text   = (document.getElementById('filterText')?.value   || '').toLowerCase().trim();
+    currentFilters.author = (document.getElementById('filterAuthor')?.value || '').toLowerCase().trim();
+    currentFilters.format = (document.getElementById('filterFormat')?.value || '').trim();
+    currentFilters.genre  = (document.getElementById('filterGenre')?.value  || '').trim(); // ← NUEVO
+    currentFilters.year   = (document.getElementById('filterYear')?.value   || '').trim();
+
+    const subEl = document.getElementById('filterSubcategory');
+    currentFilters.subcategory = (subEl && currentCategory === 'Otros') ? (subEl.value || '').trim() : '';
+
+    currentPage = 1;
+    renderItems(currentCategory);
+    
+    // ✅ Cerrar panel de filtros tras aplicar
+    bar.style.display = 'none';
+    bar.setAttribute('aria-hidden', 'true');
+  });
+  
+  
+
+  // Limpiar filtros (usa tu helper global)
+  clearBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if (typeof resetFiltersUIAndState === 'function') {
+      resetFiltersUIAndState(); // ahora también limpia genre
+    } else {
+      // Fallback si no existe el helper
+      currentFilters = { text:'', author:'', format:'', genre:'', year:'', subcategory:'' };
+      ['filterText','filterAuthor','filterFormat','filterGenre','filterYear','filterSubcategory'].forEach(id=>{
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+    currentPage = 1;
+    renderItems(currentCategory);
+    // ✅ Cerrar panel de filtros tras limpiar
+    bar.style.display = 'none';
+    bar.setAttribute('aria-hidden', 'true');
+  });
+
+  // Foco inicial en el texto
+  document.getElementById('filterText')?.focus();
+}
+  
+ function toggleView() {
+  currentView = currentView === 'list' ? 'cover' : 'list';
+  localStorage.setItem('viewMode', currentView);
+  renderItems(currentCategory);
+}
+  
+function showItemDetails(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  
+  currentItemId = id;
+  const modalBody = document.getElementById('modalBody');
+  
+  const coverHtml = item.coverImage ?
+    `<img src="${item.coverImage}" alt="${escapeHtml(item.title || '')}" class="image-preview" style="display:block; margin:0 auto;" />` :
+    `<img src="${getPlaceholderForType(item.type)}" alt="placeholder" class="image-preview" style="display:block; margin:0 auto;" />`;
+  
+  const moreInfoHtml = item.moreInfo ?
+    `<p><strong>Más info:</strong> <a href="${item.moreInfo}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.moreInfo)}</a></p>` :
+    '';
+  
+  const subcatHtml = (canonicalizeType(item.type) === 'Otros' && item.subcategory) ?
+    `<p><strong>Subcategoría:</strong> ${escapeHtml(item.subcategory || '')}</p>` :
+    '';
+  
+  const genreHtml = item.genre ?
+    `<p><strong>Género:</strong> ${escapeHtml(item.genre || '')}</p>` :
+    '';
+  
+  modalBody.innerHTML = `
+    <h3>${escapeHtml(item.title || '(Sin título)')}</h3>
+    <div style="text-align:center; margin-bottom:16px;">
+      ${coverHtml}
+    </div>
+    <div style="text-align:left;">
+      <p><strong>Categoría:</strong> ${escapeHtml(item.type || '')}</p>
+      ${subcatHtml}
+      <p><strong>Autor / Artista:</strong> ${escapeHtml(item.author || '')}</p>
+      <p><strong>Formato:</strong> ${escapeHtml(item.format || '')}</p>
+      ${genreHtml}
+      <p><strong>Año:</strong> ${escapeHtml(item.year || '')}</p>
+      ${moreInfoHtml}
+      <p><strong>Notas:</strong> ${escapeHtml(item.notes || '')}</p>
+    </div>
+
+    <div class="modal-buttons" style="display:flex; gap:10px; margin-top:12px; justify-content:center;">
+      <button type="button" class="button" id="editItemBtn">Editar</button>
+      <button type="button" class="button danger" id="deleteItemBtn">Eliminar</button>
+      <button type="button" class="button secondary" id="closeDetailsBtn">Cerrar</button>
+    </div>
+  `;
+  
+  document.getElementById('editItemBtn')?.addEventListener('click', () => enableEditMode());
+  document.getElementById('deleteItemBtn')?.addEventListener('click', () => openConfirmDeleteModal());
+  document.getElementById('closeDetailsBtn')?.addEventListener('click', () => closeModal());
+  
+  const modal = document.getElementById('modal');
+  if (modal) modal.style.display = 'block';
+}
+  
+  function enableEditMode() {
+    const item = items.find(i => i.id === currentItemId);
+    if (!item) return;
+  
+    const modalBody = document.getElementById('modalBody');
+    const itemTypeCanon = canonicalizeType(item.type);
+  
+    modalBody.innerHTML = `
+      <h3>Editar Ítem</h3>
+
+      <form id="editItemForm" novalidate>
+        <input
+          type="text"
+          id="edit-title"
+          value="${escapeHtml(item.title || '')}"
+          placeholder="Título"
+          required
+        />
+
+        <select id="edit-type" required>
+          ${categories.map(cat => {
+            const safeCat = escapeHtml(cat);
+            const selected = (canonicalizeType(cat) === itemTypeCanon) ? 'selected' : '';
+            return `<option value="${safeCat}" ${selected}>${safeCat}</option>`;
+          }).join('')}
+        </select>
+
+        <select id="edit-subcategory" style="display:none;">
+          <option value="" ${!item.subcategory ? 'selected' : ''}>Selecciona una subcategoría</option>
+          <option value="Funkos" ${item.subcategory==='Funkos' ? 'selected' : ''}>Funkos</option>
+          <option value="Lego" ${item.subcategory==='Lego' ? 'selected' : ''}>Lego</option>
+          <option value="Otros" ${item.subcategory==='Otros' ? 'selected' : ''}>Otros</option>
+        </select>
+
+        <input
+          type="text"
+          id="edit-author"
+          value="${escapeHtml(item.author || '')}"
+          placeholder="Autor / Director / Artista"
+        />
+
+        <input
+          type="text"
+          id="edit-format"
+          value="${escapeHtml(item.format || '')}"
+          placeholder="Formato"
+        />
+
+        <input
+          type="text"
+          id="edit-genre"
+          value="${escapeHtml(item.genre || '')}"
+          placeholder="Género"
+        />
+
+        <input
+          type="text"
+          id="edit-year"
+          value="${escapeHtml(item.year || '')}"
+          placeholder="Año"
+          inputmode="numeric"
+        />
+
+        <textarea
+          id="edit-notes"
+          placeholder="Notas (opcional)"
+        >${escapeHtml(item.notes || '')}</textarea>
+
+        <input
+          type="text"
+          id="edit-moreInfo"
+          value="${escapeHtml(item.moreInfo || '')}"
+          placeholder="Más info (URL)"
+        />
+
+        <label for="edit-coverImage" style="width:100%; text-align:left; display:block; margin-top:8px;">
+          Cambiar imagen de portada (opcional):
+        </label>
+
+        <input type="file" id="edit-coverImage" accept="image/*" />
+
+        <div style="text-align:center; margin:12px 0;">
+          ${
+            item.coverImage
+              ? `<img src="${escapeHtml(item.coverImage)}" id="edit-coverPreview" class="image-preview" style="display:block; margin:0 auto;" />`
+              : `<img id="edit-coverPreview" class="image-preview" style="display:none; margin:0 auto;" />`
+          }
+        </div>
+
+        <div class="modal-buttons" style="display:flex; gap:10px; justify-content:center; margin-top:12px;">
+          <button type="submit" class="button save-btn">Guardar</button>
+          <button type="button" class="button danger" onclick="openConfirmDeleteModal()">Eliminar</button>
+        </div>
+      </form>
+    `;
+  
+    // --- lógica de subcategoría ---
+    const editTypeSelect = document.getElementById('edit-type');
+    const editSub = document.getElementById('edit-subcategory');
+  
+    const refreshSubcategoryVisibility = () => {
+      if (canonicalizeType(editTypeSelect.value) === 'Otros') {
+        editSub.style.display = 'block';
+      } else {
+        editSub.style.display = 'none';
+        editSub.value = '';
+      }
+    };
+  
+    refreshSubcategoryVisibility();
+    editTypeSelect.addEventListener('change',   refreshSubcategoryVisibility);
+   
+    // --- handler de imagen (ya tienes compresión + límite) ---
+    const coverInput = document.getElementById('edit-coverImage');
+    const previewImg = document.getElementById('edit-coverPreview');
+  
+    coverInput?.addEventListener('change', async (ev) => {
+      const file = ev.target.files?.[0];
+      if (!file) return;
+    
+      try {
+        const dataUrl = await compressImageToJpegDataURL(file, 512, 0.75);
+      
+        if (isCoverTooLarge(dataUrl)) {
+          previewImg.style.display = 'none';
+          previewImg.src = '';
+          toast('Imagen demasiado grande. Prueba otra o recórtala.', 'error', 2600);
+          return;
+        }
+      
+        previewImg.src = dataUrl;
+        previewImg.style.display = 'block';
+        previewImg.style.margin = '0 auto';
+      } catch (err) {
+        console.error('[edit-coverImage]', err);
+        toast('No se pudo procesar la imagen', 'error', 2600);
+      }
+    });
+  
+  
+  document.getElementById('editItemForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const index = items.findIndex(i => i.id === currentItemId);
+    if (index === -1) return;
+
+    const newTypeRaw = document.getElementById('edit-type').value;
+    const newType = canonicalizeType(newTypeRaw);
+    const newSub = (newType === 'Otros') ? (document.getElementById('edit-subcategory').value || '') : '';
+  
+
+    const updated = {
+      ...items[index],
+      title:  document.getElementById('edit-title').value.trim(),
+      author: document.getElementById('edit-author').value.trim(),
+      format: document.getElementById('edit-format').value.trim(),
+      genre:  document.getElementById('edit-genre').value.trim(),
+      year:   document.getElementById('edit-year').value.trim(),
+      notes:  document.getElementById('edit-notes').value.trim(),
+      moreInfo: safeUrl(document.getElementById('edit-moreInfo').value.trim()),
+      type: newType,
+      subcategory: newSub
+    };
+
+    if (previewImg && previewImg.style.display === 'block'){
+      updated.coverImage = previewImg.src;
+    }
+
+    // Upsert por ID determinista (si cambia identidad, migra/merge)
+    const prev = items[index];
+    const byId = new Map(items.map(it => [String(it.id), it]));
+
+    // Quitamos el anterior siempre (vamos a reinsertar por el id nuevo)
+    byId.delete(String(prev.id));
+
+    // Si por lo que sea updated.id está desfasado, lo recalculamos aquí
+    const finalId = stableIdFromKey(stableKeyForItem(updated));
+    updated.id = finalId;
+
+    const existing = byId.get(String(updated.id));
+    byId.set(String(updated.id), {
+      ...(existing || {}),
+      ...updated,
+      // ✅ Prioridad correcta: si acabas de elegir imagen, esa manda
+      coverImage: (updated.coverImage || existing?.coverImage || prev.coverImage || null)
+    });
+
+    items = Array.from(byId.values());
+
+    saveItemsToLocalStorage();
+    closeModal();
+    showCategory(updated.type);
+    flashSuccess('Guardado correctamente');
+  });
+}
+  
+   function saveEdit() {
+      throw new Error('saveEdit() es legacy y está deshabilitada. La edición actual se gestiona con enableEditMode().');
+   }
+  
+  
+   function deleteItem() {
+      // Compatibilidad: si algún botón viejo llama a deleteItem(), usa el modal nuevo
+      openConfirmDeleteModal();
+   }
+   
+   // ===== Imagen: convertir a JPEG comprimido (para ahorrar localStorage) =====
+function compressImageToJpegDataURL(file, maxW = 512, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas no soportado'));
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ===== P4: límite preventivo de imagen (evita llenar localStorage) =====
+const MAX_COVER_DATAURL_CHARS = 480000; // ~350KB aprox en base64 (no exacto)
+function isCoverTooLarge(dataUrl) {
+  return typeof dataUrl === 'string' && dataUrl.length > MAX_COVER_DATAURL_CHARS;
+}
+
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+  
+
+  coverImage.addEventListener('change', async function(event) {
+      const file = event.target.files?.[0];
+      if (!file) {
+        coverPreview.style.display = 'none';
+        return;
+      }
+  
+      try {
+        const dataUrl = await compressImageToJpegDataURL(file, 512, 0.75);
+  
+        if (isCoverTooLarge(dataUrl)) {
+          coverPreview.style.display = 'none';
+          coverPreview.src = '';
+          toast('Imagen demasiado grande. Prueba otra o recórtala.', 'error', 2600);
+          return;
+        }
+  
+        coverPreview.src = dataUrl;
+        coverPreview.style.display = 'block';
+        } catch (err) {
+        console.error('[coverImage]', err);
+        if (typeof toast === 'function') toast('No se pudo procesar la imagen', 'error', 2200);
+        coverPreview.style.display = 'none';
+      }
+  });
+  
+  // --- Guardar un nuevo ítem desde el formulario de alta ---
+  document.getElementById('addItemForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+
+    const finalTypeRaw = document.getElementById('type').value;
+    const finalType = canonicalizeType(finalTypeRaw);
+    if (!finalType) {
+      toast('Selecciona una categoría', 'error', 2000);
+      return;
+    }
+    
+    const sub = (finalType === 'Otros') ? (document.getElementById('subcategory').value || '') : '';
+
+    const newItem = {
+      id: stableIdFromKey(stableKeyForItem({
+        type: finalType,
+        title: String(document.getElementById('title').value).trim(),
+        author: String(document.getElementById('author').value).trim(),
+        year: String(document.getElementById('year').value).trim(),
+        format: String(document.getElementById('format').value).trim(),
+        genre: String(document.getElementById('genre').value).trim(),
+        subcategory: sub
+      })),
+      
+      title: String(document.getElementById('title').value).trim(),
+      type: finalType,
+      author: String(document.getElementById('author').value).trim(),
+      format: String(document.getElementById('format').value).trim(),
+      genre:  String(document.getElementById('genre').value).trim(),   // ← nuevo campo
+      year:   String(document.getElementById('year').value).trim(),
+      notes:  String(document.getElementById('notes').value).trim(),
+      coverImage: (coverPreview.style.display === 'block') ? coverPreview.src : null,
+      moreInfo: safeUrl(document.getElementById('moreInfo').value.trim()),
+      subcategory: sub
+    };
+
+    const idx = items.findIndex(i => String(i.id) === String(newItem.id));
+
+    if (idx >= 0) {
+      // Upsert: si existe, actualiza (mantiene coverImage previa si no has seleccionado nueva)
+      const prev = items[idx];
+      items[idx] = { ...prev, ...newItem, coverImage: newItem.coverImage || prev.coverImage || null };
+    } else {
+      items.push(newItem);
+    }
+
+    saveItemsToLocalStorage();
+
+        e.target.reset();
+    coverPreview.style.display = 'none';
+    showCategory(finalType);
+
+    flashSuccess('Guardado correctamente');
+  });
+  
+  function toggleTheme() {
+  document.body.classList.toggle('dark-theme');
+  const isDark = document.body.classList.contains('dark-theme');
+
+  // Guardar preferencia
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+  // Cambiar icono según tema
+  const themeBtn = document.getElementById('themeBtn');
+  themeBtn.textContent = isDark ? '☀️' : '🌙';
+}
+
+
+function openConfirmDeleteModal() {
+  document.getElementById('confirmDeleteModal').style.display = 'block';
+}
+
+function closeConfirmDeleteModal() {
+  document.getElementById('confirmDeleteModal').style.display = 'none';
+}
+
+function confirmDelete() {
+  const idToDelete = currentItemId;
+  
+  // Si por lo que sea no hay id, salimos limpio
+  if (!idToDelete) {
+    closeConfirmDeleteModal();
+    closeModal();
+    return;
+  }
+  
+  items = items.filter(i => String(i.id) !== String(idToDelete));
+  saveItemsToLocalStorage();
+  
+  // Limpia selección para evitar acciones sobre un id ya eliminado
+  currentItemId = null;
+  
+  closeConfirmDeleteModal();
+  closeModal();
+  
+  // Refresca usando el estado, no el DOM
+  if (currentCategory) showCategory(currentCategory);
+  else showScreen('homeScreen');
+  
+    // Feedback (unificado)
+  flashSuccess('Eliminado correctamente');
+}
+
+function handleImportExcel(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      // ✅ Multi-hoja: acumulamos ítems de TODAS las hojas
+      const imported = [];
+
+      for (const sheetName of workbook.SheetNames) {
+        const sheet = workbook.Sheets[sheetName];
+        if (!sheet) continue;
+  
+        const raw = XLSX.utils.sheet_to_json(sheet, { defval: '', header: 1 });
+        if (!raw || raw.length < 2) continue; // hoja vacía o solo cabecera
+  
+        const headers = raw[0].map(h => String(h ?? '').trim());
+        const rows = raw.slice(1);
+  
+        // Requisito mínimo: "Título". "Categoría" puede venir o no (si no viene, usamos nombre de hoja)
+        if (!headers.includes("Título")) continue;
+  
+        const index = headers.reduce((acc, h, i) => (acc[h] = i, acc), {});
+        const hasCategoryCol = headers.includes("Categoría");
+  
+        const cell = (row, colName) => {
+          const i = index[colName];
+          return (i === undefined) ? '' : row[i];
+        };
+  
+        for (const row of rows) {
+          const title = String(cell(row, "Título") || '').trim();
+          if (!title) continue;
+    
+          const rawType = hasCategoryCol ?
+            String(cell(row, "Categoría") || '').trim() :
+            String(sheetName).trim();
+    
+          const type = canonicalizeType(rawType || sheetName);
+          if (!categories.includes(type)) continue;
+    
+          const obj = {
+            id: '',
+            title,
+            author: String(cell(row, "Autor") || '').trim(),
+            format: String(cell(row, "Formato") || '').trim(),
+            genre: String(cell(row, "Género") || '').trim(),
+            year: String(cell(row, "Año") || '').trim(),
+            notes: String(cell(row, "Notas") || '').trim(),
+            moreInfo: safeUrl(String(cell(row, "Más info") || '').trim()),
+            type,
+            subcategory: (type === 'Otros') ? String(cell(row, "Subcategoría") || '').trim() : '',
+            coverImage: null
+          };
+    
+          obj.id = stableIdFromKey(stableKeyForItem(obj));
+          imported.push(obj);
+        }
+      }
+
+      // Si no importamos nada de ninguna hoja, avisamos
+      if (imported.length === 0) {
+        toast('No se importaron ítems. Revisa que haya columna "Título" y categorías válidas (o nombre de hoja = categoría).', 'error', 3000);
+        return;
+      }
+      
+ 
+      // Pre-scan: calcular qué pasaría sin modificar items aún
+      const existingIds = new Set(items.map(it => String(it.id)));
+      let wouldAdd = 0;
+      let wouldUpdate = 0;
+      
+      for (const it of imported) {
+        if (existingIds.has(String(it.id))) wouldUpdate++;
+        else wouldAdd++;
+      }
+      
+      // ✅ Import real (se usa tanto en modal como en fallback)
+      const applyImport = () => {
+        const byId = new Map(items.map(it => [String(it.id), it]));
+        let added = 0;
+        let updated = 0;
+  
+        for (const it of imported) {
+          const id = String(it.id);
+          if (byId.has(id)) {
+            const prev = byId.get(id);
+            byId.set(id, { ...prev, ...it, coverImage: prev.coverImage || it.coverImage || null });
+            updated++;
+          } else {
+            byId.set(id, it);
+             added++;
+          }
+        }
+  
+        items = Array.from(byId.values());
+        saveItemsToLocalStorage();
+        renderCategoryButtons();
+        if (currentCategory) showCategory(currentCategory);
+  
+        toast(`Importación: ${added} añadidos, ${updated} actualizados`, 'success', 2200);
+      };
+      
+      // Mostrar modal de confirmación (en vez de confirm())
+      const m = document.getElementById('importConfirmModal');
+      const txt = document.getElementById('importConfirmText');
+      const okBtn = document.getElementById('importConfirmOkBtn');
+
+      if (!m || !txt || !okBtn) {
+        // Fallback por si falta algo
+        const ok = confirm(
+          `Importar Excel:\n\n` +
+          `• Añadir: ${wouldAdd}\n` +
+          `• Actualizar: ${wouldUpdate}\n\n` +
+           `¿Continuar?`
+        );
+        if (!ok) return;
+        
+        applyImport();
+      } else {
+        txt.textContent =
+        `Vas a importar este Excel:\n\n` +
+        `• Añadir: ${wouldAdd}\n` +
+        `• Actualizar: ${wouldUpdate}\n\n` +
+        `¿Continuar?`;
+        txt.style.whiteSpace = 'pre-line';
+        m.style.display = 'block';
+  
+        // Evitar listeners duplicados: reemplazamos el botón por un clon
+        const freshOk = okBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(freshOk, okBtn);
+  
+        freshOk.addEventListener('click', () => {
+          closeImportConfirmModal();
+          applyImport(); // ✅
+        });
+   
+        return; // 👈 clave: para no continuar sin confirmación
+      }
+      
+      
+    } catch (err) {
+      console.error('[handleImportExcel]', err);
+      toast('Error al importar el Excel', 'error', 2400);
+    } finally {
+      // ✅ iOS: permitir reimportar el mismo archivo consecutivamente
+      const input = document.getElementById('importExcelInput');
+      if (input) input.value = '';
+    }
+  };
+  
+  reader.readAsArrayBuffer(file);
+}
+
+function openExportMenu() {
+  const modal = document.getElementById('exportModal');
+  const options = document.getElementById('exportOptions');
+  if (!modal || !options) return;
+  
+  options.innerHTML = '';
+  
+  const makeOpt = (label, categoryOrNull) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'button';
+    btn.textContent = label;
+    btn.onclick = async () => {
+      closeExportModal();
+      await exportExcelAll(categoryOrNull);
+    };
+    return btn;
+  };
+  
+  // Exportar TODO (Excel)
+options.appendChild(makeOpt('Exportar TODO (Excel)', null));
+
+// Exportar JSON (todo)
+{
+  const btnJson = document.createElement('button');
+  btnJson.type = 'button';
+  btnJson.className = 'button';
+  btnJson.textContent = 'Exportar TODO (JSON)';
+  btnJson.onclick = async () => {
+    closeExportModal();
+    await exportJSON();
+  };
+  options.appendChild(btnJson);
+}
+
+// Botones por categoría (Excel)
+categories.forEach(cat => {
+  options.appendChild(makeOpt(`Exportar ${cat} (Excel)`, cat));
+});
+  
+  modal.style.display = 'block';
+}
+
+function closeExportModal() {
+  const modal = document.getElementById('exportModal');
+  if (modal) modal.style.display = 'none';
+}
+
+
+function pickItemsForExport(categoryOrNull) {
+  if (!categoryOrNull) return items;
+  const canon = canonicalizeType(categoryOrNull);
+  return items.filter(it => canonicalizeType(it.type) === canon);
+}
+
+async function exportExcelAll(categoryOrNull) {
+  if (typeof XLSX === 'undefined') {
+    toast('Exportar a Excel no disponible (XLSX no cargada)', 'error', 2600);
+    return;
+  }
+  
+  const HEADERS = ['Título', 'Categoría', 'Subcategoría', 'Autor', 'Formato', 'Género', 'Año', 'Más info', 'Notas'];
+  
+  const toRow = (it) => ({
+    'Título': String(it.title ?? '').trim(),
+    'Categoría': String(it.type ?? '').trim(),
+    'Subcategoría': String(it.subcategory ?? '').trim(),
+    'Autor': String(it.author ?? '').trim(),
+    'Formato': String(it.format ?? '').trim(),
+    'Género': String(it.genre ?? '').trim(),
+    'Año': String(it.year ?? '').trim(),
+    'Más info': String(it.moreInfo ?? '').trim(),
+    'Notas': String(it.notes ?? '').trim()
+  });
+  
+  const wb = XLSX.utils.book_new();
+  
+  // ✅ Caso 1: Exportar TODO -> multi-hoja (una hoja por categoría)
+  if (!categoryOrNull) {
+    for (const cat of categories) {
+      const src = pickItemsForExport(cat);
+      const rows = src.map(toRow);
+      
+      // Nombre de hoja compatible Excel (máx 31 chars, sin caracteres raros)
+      const sheetName = String(cat).replace(/[:\\/?*\[\]]/g, '-').slice(0, 31);
+      
+      const ws = XLSX.utils.json_to_sheet(rows, { header: HEADERS });
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    }
+  } else {
+    // ✅ Caso 2: Exportar una categoría -> 1 hoja
+    const src = pickItemsForExport(categoryOrNull);
+    const rows = src.map(toRow);
+    
+    const sheetName = String(canonicalizeType(categoryOrNull))
+      .replace(/[:\\/?*\[\]]/g, '-')
+      .slice(0, 31) || 'MiColeccion';
+    
+    const ws = XLSX.utils.json_to_sheet(rows, { header: HEADERS });
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  }
+  
+  // Bytes XLSX
+  const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([out], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+  
+  const tag = categoryOrNull ? `-${canonicalizeType(categoryOrNull)}` : '-TODO';
+  const filename = `mi-coleccion${tag}-${new Date().toISOString().slice(0,10)}.xlsx`;
+  
+  // 1) Share Sheet (mejor en iPhone)
+  try {
+    const file = new File([blob], filename, { type: blob.type });
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+      await navigator.share({
+        title: 'Exportar colección (Excel)',
+        text: 'Excel de Mi Colección',
+        files: [file]
+      });
+      return;
+    }
+  } catch (e) {
+    console.warn('[exportExcelAll] share falló, uso fallback', e);
+  }
+  
+  // 2) Fallback: abrir blob en pestaña
+  try {
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    if (!w) {
+      toast('No se pudo abrir pestaña (popups bloqueados). Prueba en Safari', 'error', 2600);
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch (e) {
+    console.error('[exportExcelAll] fallback falló', e);
+    toast('Exportación a Excel fallida', 'error', 2600);
+  }
+}
+
+async function exportJSON() {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    app: 'MiColeccion',
+    version: 1,
+    items
+  };
+  
+  const jsonText = JSON.stringify(payload, null, 2);
+  const filename = `mi-coleccion-${new Date().toISOString().slice(0,10)}.json`;
+  
+  // 1) Intento "pro": Share Sheet (iOS/Android modernos)
+  try {
+    const blob = new Blob([jsonText], { type: 'application/json' });
+    const file = new File([blob], filename, { type: 'application/json' });
+    
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+      await navigator.share({
+        title: 'Exportar colección',
+        text: 'Backup JSON de Mi Colección',
+        files: [file]
+      });
+      return; // éxito: ya lo compartiste/guardaste
+    }
+  } catch (e) {
+    // seguimos al fallback
+    console.warn('[exportJSON] share falló, uso fallback', e);
+  }
+  
+  // 2) Fallback: abrir el JSON en una pestaña (desde ahí: Compartir -> Guardar en Archivos)
+  try {
+    const blob = new Blob([jsonText], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // iOS suele responder mejor a window.open que a <a download>
+    const w = window.open(url, '_blank');
+    if (!w) {
+      // Popup bloqueado: intentamos portapapeles y avisamos con toast
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(jsonText);
+        toast('Popup bloqueado: JSON copiado al portapapeles', 'success', 2600);
+      } else {
+        toast('Popup bloqueado: prueba en Safari o permite popups', 'error', 2600);
+      }
+    }
+    
+    
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch (e) {
+    console.error('[exportJSON] fallback falló', e);
+    toast('Exportación JSON fallida', 'error', 2600);
+  }
+}
+
+    
+function renderCategorySelect() {
+  const select = document.getElementById('type');
+  if (!select) return;
+
+  select.innerHTML = '<option value="" disabled selected>Selecciona una categoría</option>';
+  const sorted = [...categories].sort();
+  sorted.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    select.appendChild(option);
+  });
+}
+
+function populateFilterOptions(category) {
+  const canon = canonicalizeType(category);
+  const inCat = items.filter(i => canonicalizeType(i.type) === canon);
+  
+  const formats = [...new Set(inCat.map(i => String(i.format ?? '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  
+  const years = [...new Set(inCat.map(i => String(i.year ?? '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+  
+  const genres = [...new Set(inCat.map(i => String(i.genre ?? '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  
+  // Helper: repoblar un <select> de forma segura (sin innerHTML con datos)
+  function fillSelect(sel, defaultLabel, values) {
+    if (!sel) return;
+    const prev = String(sel.value || '');
+    
+    // Limpia
+    sel.textContent = '';
+    
+    // Default
+    const def = document.createElement('option');
+    def.value = '';
+    def.textContent = defaultLabel;
+    sel.appendChild(def);
+    
+    // Options seguras
+    for (const v of values) {
+      const opt = document.createElement('option');
+      opt.value = v; // value NO ejecuta HTML
+      opt.textContent = v; // textContent => seguro
+      sel.appendChild(opt);
+    }
+    
+    // Intenta mantener selección previa si sigue existiendo
+    const prevNorm = String(prev || '').trim();
+    if (prevNorm) {
+      const match = values.find(v => String(v).trim() === prevNorm);
+      if (match) sel.value = match;
+    }
+  }
+  
+  fillSelect(document.getElementById('filterFormat'), 'Todos los formatos', formats);
+  fillSelect(document.getElementById('filterYear'), 'Todos los años', years);
+  fillSelect(document.getElementById('filterGenre'), 'Todos los géneros', genres);
+}
+
+
+// --- Placeholders embebidos (sin red) ---
+function svgPlaceholder(label, emoji) {
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>
+       <rect width='100%' height='100%' rx='12' fill='#2f2f45'/>
+       <text x='50%' y='46%' dominant-baseline='middle' text-anchor='middle' font-size='52'>${emoji}</text>
+       <text x='50%' y='88%' dominant-baseline='middle' text-anchor='middle' font-size='12' fill='#cfd8dc'>${label}</text>
+     </svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+function getPlaceholderForType(type) {
+  switch (type) {
+    case 'Libros':       return svgPlaceholder('Libro',     '📘');
+    case 'Películas':    return svgPlaceholder('Película',  '🎬');
+    case 'Videojuegos':  return svgPlaceholder('Juego',     '🎮');
+    case 'CDs':          return svgPlaceholder('CD',        '💿');
+    case 'Vinilos':      return svgPlaceholder('Vinilo',    '📀');
+    case 'Otros':        return svgPlaceholder('Otros',     '📦');
+    default:             return svgPlaceholder('Ítem',      '🗂️');
+  }
+}
+
+function renderItems(category){
+  const list = document.getElementById('itemList');
+  const pagination = document.getElementById('paginationControls');
+  const countEl = document.getElementById('categoryItemCount');
+
+  // Normaliza la categoría actual
+  const canonCat = canonicalizeType(category);
+
+  // Filtrado robusto (forzando strings)
+  const filtered = items
+    .filter(item => {
+      if (canonicalizeType(item.type) !== canonCat) return false;
+
+      const titleOk  = normalizeText(item.title).includes(currentFilters.text || '');
+      const authorOk = normalizeText(item.author).includes(currentFilters.author || '');
+      const formatOk = !currentFilters.format || String(item.format ?? '') === currentFilters.format;
+      const genreOk  = !currentFilters.genre  || String(item.genre  ?? '') === currentFilters.genre;
+      const yearOk   = !currentFilters.year   || String(item.year   ?? '') === currentFilters.year;
+      const subOk    = (canonCat !== 'Otros')
+        ? true
+        : (!currentFilters.subcategory || String(item.subcategory ?? '') === currentFilters.subcategory);
+
+      return titleOk && authorOk && formatOk && genreOk && yearOk && subOk;
+    })
+    .sort((a,b)=>
+      String(a.title ?? '').localeCompare(String(b.title ?? ''), 'es', { sensitivity:'base', numeric:true })
+    );
+
+  // Paginación
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset UI
+  countEl.textContent = `Total: ${filtered.length} ítem${filtered.length!==1?'s':''}`;
+  list.innerHTML = '';
+  pagination.innerHTML = '';
+
+  // Vacío
+  if (filtered.length === 0){
+    list.innerHTML = '<p style="text-align:center;">No hay ítems en esta categoría con los filtros actuales.</p>';
+    return;
+  }
+
+  // Render: lista o cuadrícula
+  if (currentView === 'list') {
+    currentItems.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'item';
+
+      // ✅ Construcción segura: sin innerHTML
+      const titleEl = document.createElement('strong');
+      titleEl.textContent = String(item.title || '(Sin título)');
+      div.appendChild(titleEl);
+
+      div.appendChild(document.createElement('br'));
+      div.appendChild(document.createTextNode(String(item.author || '')));
+
+      // Subcategoría solo en "Otros"
+      const sub = String(item.subcategory || '').trim();
+      if (canonCat === 'Otros' && sub) {
+        div.appendChild(document.createElement('br'));
+        const small = document.createElement('small');
+        small.className = 'subcat-inline';
+        small.textContent = `Subcategoría: ${sub}`;
+        div.appendChild(small);
+      }
+
+      div.onclick = () => showItemDetails(item.id);
+      list.appendChild(div);
+    });
+  } else {
+    const grid = document.createElement('div');
+    grid.className = 'cover-grid';
+    currentItems.forEach(item => {
+      const img = document.createElement('img');
+      img.src = item.coverImage ? item.coverImage : getPlaceholderForType(item.type);
+      img.alt = String(item.title || 'placeholder');
+      img.loading = 'lazy';
+      img.onclick = () => showItemDetails(item.id);
+      grid.appendChild(img);
+    });
+    list.appendChild(grid);
+  }
+
+  // Controles de paginación (select + primera/prev/sig/última)
+  if (totalPages > 1){
+
+    const makeBtn = (label, onClick, {disabled=false, title=''} = {}) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.title = title || label;
+      b.className = 'page-btn'; // ✅ estilos por clase (tema-aware)
+      if (disabled) b.disabled = true;
+      else b.onclick = onClick;
+      return b;
+    };
+
+    // « Primera
+    pagination.appendChild(
+      makeBtn('«', () => { currentPage = 1; renderItems(canonCat); }, { disabled: currentPage === 1, title: 'Primera página' })
+    );
+
+    // ‹ Anterior
+    pagination.appendChild(
+      makeBtn('‹', () => { currentPage -= 1; renderItems(canonCat); }, { disabled: currentPage === 1, title: 'Página anterior' })
+    );
+
+    // Select de páginas
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', 'Seleccionar página');
+    select.className = 'page-select'; // ✅ estilos por clase (tema-aware)
+
+    for (let i = 1; i <= totalPages; i++){
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = `Página ${i}`;
+      if (i === currentPage) opt.selected = true;
+      select.appendChild(opt);
+    }
+
+    select.addEventListener('change', () => {
+      const val = Number(select.value) || 1;
+      currentPage = Math.min(Math.max(1, val), totalPages);
+      renderItems(canonCat);
+    });
+    pagination.appendChild(select);
+
+    // › Siguiente
+    pagination.appendChild(
+      makeBtn('›', () => { currentPage += 1; renderItems(canonCat); }, { disabled: currentPage === totalPages, title: 'Página siguiente' })
+    );
+
+    // » Última
+    pagination.appendChild(
+      makeBtn('»', () => { currentPage = totalPages; renderItems(canonCat); }, { disabled: currentPage === totalPages, title: 'Última página' })
+    );
+  }
+}
+
+// Mostrar/ocultar subcategoría en "Añadir Ítem"
+const typeSelect = document.getElementById('type');
+const subcategorySelect = document.getElementById('subcategory');
+
+
+if (typeSelect && subcategorySelect) {
+  const syncSubcategory = () => {
+    const canon = canonicalizeType(typeSelect.value);
+    if (canon === 'Otros') {
+      subcategorySelect.style.display = 'block';
+    } else {
+      subcategorySelect.style.display = 'none';
+      subcategorySelect.value = ''; // resetear si no aplica
+    }
+  };
+  
+  typeSelect.addEventListener('change', syncSubcategory);
+  syncSubcategory(); // aplica al cargar por si hubiera valor preseleccionado
+}
+
+function fixStoredTitles() {
+  try {
+    const arr = DataStore.load();
+    if (!Array.isArray(arr)) return;
+
+    let changed = false;
+
+    const fixed = arr.map(it => {
+      const out = { ...it };
+
+      const newTitle = String(out.title ?? '').trim();
+      const newAuthor = String(out.author ?? '').trim();
+      const newType = canonicalizeType(out.type);
+
+      if (newTitle !== String(it.title ?? '')) { out.title = newTitle; changed = true; }
+      if (newAuthor !== String(it.author ?? '')) { out.author = newAuthor; changed = true; }
+      if (newType !== it.type) { out.type = newType; changed = true; }
+
+      return out;
+    });
+
+    if (changed) {
+      DataStore.save(fixed);
+      console.log('[fixStoredTitles] Datos normalizados en localStorage.');
+    }
+  } catch (e) {
+    console.warn('[fixStoredTitles] Error corrigiendo datos:', e);
+  }
+}
+
+// ==== INIT al cargar ==== 
+document.addEventListener('DOMContentLoaded', () => {
+  // 0) Cargar preferencia de vista (lista/portadas)
+  const savedView = localStorage.getItem('viewMode');
+  if (savedView === 'list' || savedView === 'cover') {
+    currentView = savedView;
+  }
+  
+  // 1) Cargar datos existentes
+  fixStoredTitles();
+  loadItemsFromLocalStorage();
+  
+  // 2) Pintar grilla de categorías y el <select> del formulario
+  renderCategoryButtons();
+  renderCategorySelect();
+  
+  // 3) Enlazar importador Excel
+  const importInput = document.getElementById('importExcelInput');
+  if (importInput) {
+    importInput.addEventListener('change', handleImportExcel);
+  }
+  
+ 
+  
+  // 4) Aplicar tema guardado y ajustar icono
+  const savedTheme = localStorage.getItem('theme');
+  const themeBtn = document.getElementById('themeBtn');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+    if (themeBtn) themeBtn.textContent = '☀️';
+  } else {
+    if (themeBtn) themeBtn.textContent = '🌙';
+  }
+  
+  wireCloseOnBackdrop();
+});
+
+function resetFiltersUIAndState(){
+  currentFilters = { text:'', author:'', format:'', genre:'', year:'', subcategory:'' };
+  ['filterText','filterAuthor','filterFormat','filterGenre','filterYear','filterSubcategory'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+function closeImportConfirmModal() {
+  const m = document.getElementById('importConfirmModal');
+  if (m) m.style.display = 'none';
+}
+
+// ===== UX iPhone: cerrar modales al tocar fuera (backdrop) =====
+function wireCloseOnBackdrop() {
+  const handler = (e) => {
+    // En iOS/touch, target puede ser un Text node; subimos a su parentElement si hace falta
+    const raw = e.target;
+    const el = (raw && raw.nodeType === 3) ? raw.parentElement : raw; // 3 = Text
+    if (!el || typeof el.closest !== 'function') return;
+    
+    // Solo cerrar si el tap/click fue sobre el backdrop (.modal), no dentro de .modal-content
+    const modalEl = el.closest('.modal');
+    if (!modalEl) return;
+    if (el.closest('.modal-content')) return;
+    
+    switch (modalEl.id) {
+      case 'modal':
+        closeModal();
+        break;
+      case 'confirmDeleteModal':
+        closeConfirmDeleteModal();
+        break;
+      case 'exportModal':
+        closeExportModal();
+        break;
+      case 'importConfirmModal':
+        closeImportConfirmModal();
+        break;
+      default:
+        modalEl.style.display = 'none';
+    }
+  };
+  
+  // click + touchstart para iPhone (tap rápido)
+  document.addEventListener('click', handler);
+  document.addEventListener('touchstart', handler, { passive: true });
+}
+
+</script>
+</body>
+</html>
+
+
+
