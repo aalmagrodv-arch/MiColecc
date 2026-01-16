@@ -1,5 +1,5 @@
 // sw.js
-const CACHE_NAME = 'mi-coleccion-v1';
+const CACHE_NAME = 'mi-coleccion-v3';
 const ASSETS = [
   './',
   './index.html',
